@@ -17,6 +17,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.btSaveNewGame.setOnClickListener {
+            startActivity(Intent(this,RegisterMovieActivity::class.java))
+        }
     }
 
 }
