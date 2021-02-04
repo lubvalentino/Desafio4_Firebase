@@ -1,13 +1,23 @@
 package com.example.desafio4_firebase
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
+import android.widget.TextView
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import com.example.desafio4_firebase.databinding.ActivityRegisterMovieBinding
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.UploadTask
+import com.google.firebase.storage.ktx.storage
+import java.util.*
 
 class RegisterMovieActivity : AppCompatActivity() {
 
@@ -17,13 +27,53 @@ class RegisterMovieActivity : AppCompatActivity() {
         Firebase.firestore
     }
 
+    private val storageRef by lazy{
+        Firebase.storage.reference
+    }
+
+    private lateinit var file: Uri
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterMovieBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.ibPoster.setOnClickListener {
+            val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(pickPhoto, IMAGE_PICK_CODE)
+        }
         setupObservables()
 
+    }
+
+    private fun uploadImageToFirebase(fileUri: Uri) {
+        fileUri.let{
+            val fileName = UUID.randomUUID().toString() +".jpg"
+            val refStorage = storageRef.child("images/$fileName")
+
+            refStorage.putFile(fileUri)
+                .addOnSuccessListener(
+                    OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
+                        taskSnapshot.storage.downloadUrl.addOnSuccessListener {
+                            val imageUrl = it.toString()
+                            Glide.with(this@RegisterMovieActivity).load(file).into(binding.ibPoster)
+                        }
+                    })
+
+                .addOnFailureListener(OnFailureListener { e ->
+                    print(e.message)
+                })
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE){
+            findViewById<TextView>(R.id.tvPhoto).text = data?.data?.path.toString()
+            file = data?.data!!
+            uploadImageToFirebase(file as Uri)
+        }
     }
 
     private fun setupObservables() {
@@ -32,7 +82,9 @@ class RegisterMovieActivity : AppCompatActivity() {
             //criar a tabela de dados
             val game = hashMapOf(
                 "name" to binding.etNameGame.text.toString(),
-                "detail" to binding.etDetailGame.text.toString()
+                "created" to binding.etCreated.text.toString(),
+                "detail" to binding.etDetailGame.text.toString(),
+                "foto" to file.path.toString()
             )
 
             //adicionar novo item na coleção de dados
@@ -48,5 +100,9 @@ class RegisterMovieActivity : AppCompatActivity() {
                 }
         }
 
+    }
+
+    companion object{
+        const val IMAGE_PICK_CODE = 1000
     }
 }

@@ -31,8 +31,6 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-
         binding.btRegister2.setOnClickListener {
             val email = binding.etEmail2.text.toString()
             val nome = binding.etName.text.toString()
@@ -43,6 +41,7 @@ class RegisterActivity : AppCompatActivity() {
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                     //quando for sucesso no login
                     .addOnSuccessListener {
+                        val user = firebaseAuth.currentUser
                         setupObservables()
                         //quando der falha no login
                     }.addOnFailureListener {
@@ -74,5 +73,10 @@ class RegisterActivity : AppCompatActivity() {
             }.addOnFailureListener {
                 Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = firebaseAuth.currentUser
     }
 }
