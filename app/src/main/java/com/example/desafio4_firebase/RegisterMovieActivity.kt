@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
@@ -32,6 +33,7 @@ class RegisterMovieActivity : AppCompatActivity() {
     }
 
     private lateinit var file: Uri
+    private lateinit var imageUrl:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +57,8 @@ class RegisterMovieActivity : AppCompatActivity() {
                 .addOnSuccessListener(
                     OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
                         taskSnapshot.storage.downloadUrl.addOnSuccessListener {
-                            val imageUrl = it.toString()
-                            Glide.with(this@RegisterMovieActivity).load(file).into(binding.ibPoster)
+                            imageUrl = it.toString()
+                            Glide.with(this@RegisterMovieActivity).load(imageUrl).into(binding.ibPoster)
                         }
                     })
 
@@ -70,7 +72,7 @@ class RegisterMovieActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE){
-            findViewById<TextView>(R.id.tvPhoto).text = data?.data?.path.toString()
+//            findViewById<TextView>(R.id.tvPhoto).text = data?.data?.path.toString()
             file = data?.data!!
             uploadImageToFirebase(file as Uri)
         }
@@ -84,7 +86,7 @@ class RegisterMovieActivity : AppCompatActivity() {
                 "name" to binding.etNameGame.text.toString(),
                 "created" to binding.etCreated.text.toString(),
                 "detail" to binding.etDetailGame.text.toString(),
-                "foto" to file.path.toString()
+                "foto" to imageUrl.toString()
             )
 
             //adicionar novo item na coleção de dados
@@ -93,7 +95,8 @@ class RegisterMovieActivity : AppCompatActivity() {
                 .set(game, SetOptions.merge())
                 .addOnSuccessListener {
                     Toast.makeText(this, "Game cadastrado", Toast.LENGTH_LONG).show()
-                    startActivity(Intent(this, MainActivity::class.java))
+//                    startActivity(Intent(this, MainActivity::class.java))
+                    onBackPressed()
                     finish()
                 }.addOnFailureListener {
                     Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
