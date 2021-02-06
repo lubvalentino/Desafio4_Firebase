@@ -6,8 +6,6 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
-import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.example.desafio4_firebase.databinding.ActivityRegisterMovieBinding
@@ -20,7 +18,7 @@ import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import java.util.*
 
-class RegisterMovieActivity : AppCompatActivity() {
+class RegisterGameActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityRegisterMovieBinding
 
@@ -58,7 +56,7 @@ class RegisterMovieActivity : AppCompatActivity() {
                     OnSuccessListener<UploadTask.TaskSnapshot> { taskSnapshot ->
                         taskSnapshot.storage.downloadUrl.addOnSuccessListener {
                             imageUrl = it.toString()
-                            Glide.with(this@RegisterMovieActivity).load(imageUrl).into(binding.ibPoster)
+                            Glide.with(this@RegisterGameActivity).load(imageUrl).into(binding.ibPoster)
                         }
                     })
 
