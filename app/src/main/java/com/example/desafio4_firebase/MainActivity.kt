@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     fun loadGames(){
         getGamesList().addOnCompleteListener {
             if (it.isSuccessful){
-                listGamesFinal = (it.result!!.toObjects(GamesItem::class.java))
+                listGamesFinal = (it.result?.toObjects(GamesItem::class.java) as MutableList<GamesItem>)
                 gamesAdapter.listGames = listGamesFinal
                 gamesAdapter.notifyDataSetChanged()
                 setupRecyclerView(listGamesFinal)
